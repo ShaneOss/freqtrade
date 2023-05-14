@@ -264,9 +264,12 @@ class BaseReinforcementLearningModel(IFreqaiModel):
             observations = dataframe.iloc[window.index]
             if self.live and self.rl_config.get('add_state_info', False):
                 market_side, current_profit, trade_duration = self.get_state_info(dk.pair)
-                observations['current_profit_pct'] = current_profit
-                observations['position'] = market_side
-                observations['trade_duration'] = trade_duration
+                state_info = pd.DataFrame({
+                    'current_profit_pct': current_profit,
+                    'position': market_side,
+                    'trade_duration': trade_duration
+                }, index=observations.index)
+                observations = pd.concat([observations, state_info], axis=1)
             res, _ = model.predict(observations, deterministic=True)
             return res
 
